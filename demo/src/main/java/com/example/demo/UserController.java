@@ -5,32 +5,38 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
-public class UserController {
-
+public class UserController{
     private final UserService userService;
 
-    public UserController(UserService userService){
+    UserController(UserService userService){
         this.userService = userService;
     }
 
-    //
+    // Service로 넘기는 메서드들
+
     @PostMapping
     public UserResponseDto createUser(@RequestBody UserRequestDto request){
         return userService.createUser(request);
     }
 
+    // 전체 조회
     @GetMapping
-    public List<UserResponseDto> getUsers(){
-        return userService.getUsers();
+    public List<UserResponseDto> readAllUsers(){
+        return userService.readAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public UserResponseDto readUser(@PathVariable long id){ // 뭔지 모르겠음...
+        return userService.readUser(id);
+    }
+
+    @PutMapping("/{id}")
+    public UserResponseDto updateUser(@PathVariable long id, @RequestBody UserRequestDto request){
+        return userService.updateUser(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable long id){
+        userService.deleteUser(id);
     }
 }
-
-/*
-- URL 요청 받기
-- 요청 데이터를 DTO로 받기
-- Service 호출
-@RestController: 매서드의 반환값을 응답 본문으로 바로 보냄(문자열->문자열 / 객체->JSON)
-@RequestMapping("/user"): 컨트롤러의 전체 기본 주소
-@PostMapping: /users 요청 시 해당 메서드 실행
-@RequestBody: 요청 본문(JSON)을 UserRequestDto 객체로 변환
- */

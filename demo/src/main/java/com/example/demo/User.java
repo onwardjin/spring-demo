@@ -1,20 +1,20 @@
 package com.example.demo;
 
-public class User {
+public class User{
+    private long id;
     private String name;
     private int age;
 
-    public User(String name, int age){
+    User(long id, String name, int age){
+        this.id = id;
         this.name = name;
         this.age = age;
     }
 
+    public long getId(){ return id; }
     public String getName(){ return name; }
     public int getAge(){ return age; }
-}
 
-/*
-- 내부에서 사용할 사용자 데이터 표현
-- 서비스 로직에서 다룰 기본 객체
-- 요청/응답 객체와 분리
- */
+    public void setName(String name){ this.name = name; }
+    public void setAge(int age){ this.age = age; }
+}

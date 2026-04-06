@@ -12,8 +12,8 @@ POST http://localhost:8080/users
 Content-Type: application/json
 
 {
-  "name": "Steve",
-  "age": 25
+"name": "Steve",
+"age": 20
 }
 
 ###
@@ -22,6 +22,28 @@ POST http://localhost:8080/users
 Content-Type: application/json
 
 {
-  "name": "Taylor",
-  "age": 30
+  "name": "Brian",
+  "age": 55
 }
+
+###
+
+GET http://localhost:8080/users
+
+###
+
+PUT http://localhost:8080/users/2
+Content-Type: application/json
+
+{
+"name": "Steve-update",
+"age": 30
+}
+
+###
+
+DELETE http://localhost:8080/users/2
+
+###
+
+GET http://localhost:8080/users

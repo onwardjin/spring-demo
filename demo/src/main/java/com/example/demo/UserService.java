@@ -4,28 +4,60 @@ import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService {
-    // 가짜 DB, 학습용
-    private List<User> users = new ArrayList<>();
+public class UserService{
+    List<User> users = new ArrayList<>(); // Fake DATABASE
+    long nextId = 1;
 
+
+    // CRUD 구현
+
+    // CREATE: DB저장, 결과값반환
     public UserResponseDto createUser(UserRequestDto request){
-        User user = new User(request.getName(), request.getAge());
+        User user = new User(nextId++, request.getName(), request.getAge());
         users.add(user);
         return new UserResponseDto(user.getName(), user.getAge());
     }
 
-    public List<UserResponseDto> getUsers(){
-        List<UserResponseDto> tmpUser = new ArrayList<>();
+    // READ01: 전체조회
+    public List<UserResponseDto> readAllUsers(){
+        List<UserResponseDto> result = new ArrayList<>();
         for(User u:users){
-            tmpUser.add(new UserResponseDto(u.getName(), u.getAge()));
+            result.add(new UserResponseDto(u.getName(), u.getAge()));
         }
-        return tmpUser;
+        return result;
+    }
+
+    // READ02: DB조회, id기준 조회
+    public UserResponseDto readUser(long id){
+        for(User u:users){
+            if(u.getId() == id) return new UserResponseDto(u.getName(), u.getAge());
+        }
+        return null;
+    }
+
+    // UPDATE: DB항목 수정, 결과값반환
+    public UserResponseDto updateUser(long id, UserRequestDto request){
+        for(User u:users){
+            if(u.getId() == id){
+                u.setName(request.getName());
+                u.setAge(request.getAge());
+                return new UserResponseDto(u.getName(), u.getAge());
+            }
+        }
+        return null;
+    }
+
+    // DELETE: DB항목 삭제, 결과 반환없음
+    public void deleteUser(long id){
+        Iterator<User> it = users.iterator();
+
+        while(it.hasNext()){
+            User u = it.next();
+
+            if(u.getId() == id){
+                it.remove();
+                return;
+            }
+        }
     }
 }
-
-/*
-- UserController가 받은 요청을 실제로 처리
-- 내부 객체 생성
-- 응답 객체로 변환
-- 컨트롤러는 얇게 두고 서비스에 처리 로직을 넘김
- */
