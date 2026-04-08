@@ -1,8 +1,8 @@
 package com.example.demo;
 
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -22,39 +22,27 @@ public class UserService{
 
     // READ ALL
     public List<UserResponseDto> readAllUser(){
-        List<User> users = userRepository.findAll();
-        List<UserResponseDto> result = new ArrayList<>();
+        return userRepository.findAll().stream()
+                .map(u->new UserResponseDto(u.getName(), u.getAge()))
+                .toList();
 
-        for(User u:users){
-            result.add(new UserResponseDto(u.getName(), u.getAge()));
-        }
-
-        return result;
     }
-
     // READ ONE
     public UserResponseDto readUser(long id){
-        Optional<User> optionalUser = userRepository.findById(id);
-
-        if(optionalUser.isPresent()){
-            User u = optionalUser.get();
-            return new UserResponseDto(u.getName(), u.getAge());
-        }
-        return null;
+        return userRepository.findById(id)
+                .map(u->new UserResponseDto(u.getName(), u.getAge()))
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     // UPDATE
     public UserResponseDto updateUser(long id, UserRequestDto request){
-        Optional<User> optionalUser = userRepository.findById(id);
-        if(optionalUser.isPresent()){
-            User u = optionalUser.get();
-            u.setName(request.getName());
-            u.setAge(request.getAge());
+        User u = userRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("User not found"));
+        u.setName(request.getName());
+        u.setAge(request.getAge());
+        User updatedUser = userRepository.save(u);
 
-            User updateUser = userRepository.save(u);
-            return new UserResponseDto(updateUser.getName(), updateUser.getAge());
-        }
-        return null;
+        return new UserResponseDto(updatedUser.getName(), updatedUser.getAge());
     }
 
     // DELETE
