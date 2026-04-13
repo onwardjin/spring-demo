@@ -1,0 +1,101 @@
+### User / Order CRUD 테스트
+### 1. USER 생성 (기본 데이터)
+
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "John Smith",
+  "age": 28
+}
+
+###
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "Emily Johnson",
+  "age": 24
+}
+
+###
+### 2. USER 전체 조회
+GET http://localhost:8080/users
+
+###
+### 3. ORDER 생성 (userId 필요)
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "item": "MacBook Pro",
+  "userId": 1
+}
+
+###
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "item": "iPhone 15",
+  "userId": 2
+}
+
+###
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "item": "AirPods Pro",
+  "userId": 1
+}
+
+###
+### 4. ORDER 전체 조회 (N+1 체크 대상)
+GET http://localhost:8080/orders
+
+###
+### 5. ORDER 단건 조회
+GET http://localhost:8080/orders/1
+
+###
+### 6. ORDER 수정 (item만 변경)
+PUT http://localhost:8080/orders/1
+Content-Type: application/json
+
+{
+  "item": "MacBook Air",
+  "userId": 1
+}
+
+###
+### 7. ORDER 삭제
+DELETE http://localhost:8080/orders/2
+
+###
+### 8. ORDER 삭제 확인
+GET http://localhost:8080/orders
+
+###
+### 9. ORDER 예외 확인
+GET http://localhost:8080/orders/999
+
+###
+### 10. USER Validation 확인
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "",
+  "age": null
+}
+
+###
+### 11. ORDER Validation 확인
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "item": "",
+  "userId": null
+}
