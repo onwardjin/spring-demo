@@ -1,15 +1,17 @@
 package com.example.demo.dto;
 
+import java.util.List;
+
 public class ErrorResponseDto {
     private int status;
-    private String message;
+    private List<String> errors;
 
-    public ErrorResponseDto(int status, String message){
+    public ErrorResponseDto(int status, List<String> errors){
         this.status = status;
-        this.message = message;
+        this.errors = errors;
     }
 
-    public String getMessage(){
-        return message;
+    public List<String> getMessage(){
+        return errors;
     }
 }

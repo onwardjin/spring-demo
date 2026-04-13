@@ -3,6 +3,7 @@ import com.example.demo.service.OrderService;
 import com.example.demo.dto.OrderRequestDto;
 import com.example.demo.dto.OrderResponseDto;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderResponseDto createOrder(@RequestBody OrderRequestDto request){
+    public OrderResponseDto createOrder(@Valid @RequestBody OrderRequestDto request){
         return orderService.createOrder(request);
     }
 
@@ -32,7 +33,7 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public OrderResponseDto update(
-            @PathVariable Long id,
+            @Valid @PathVariable Long id,
             @RequestBody OrderRequestDto request
     ) {
         return orderService.updateOrder(id, request);

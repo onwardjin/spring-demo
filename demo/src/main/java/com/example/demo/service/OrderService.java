@@ -35,8 +35,9 @@ public class OrderService {
         return new OrderResponseDto(orderRepository.save(order));
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponseDto> getAllOrders(){
-        return orderRepository.findAll().stream()
+        return orderRepository.findAllWithUser().stream()
                 .map(OrderResponseDto::new)
                 .toList();
     }

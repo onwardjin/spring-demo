@@ -79,3 +79,13 @@ GET http://localhost:8080/orders
 ###
 ### 9. 오류 확인
 GET http://localhost:8080/orders/999
+
+###
+### 10. Valid 확인
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "",
+  "age": null
+}
