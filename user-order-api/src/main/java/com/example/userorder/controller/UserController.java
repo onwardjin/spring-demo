@@ -1,6 +1,7 @@
 package com.example.userorder.controller;
 
 import com.example.userorder.dto.LoginRequestDto;
+import com.example.userorder.dto.LoginResponseDto;
 import com.example.userorder.dto.UserRequestDto;
 import com.example.userorder.dto.UserResponseDto;
 import com.example.userorder.service.UserService;
@@ -24,7 +25,7 @@ public class UserController{
     }
 
     @PostMapping("/login")
-    public UserResponseDto login(@Valid @RequestBody LoginRequestDto requestDto){
+    public LoginResponseDto login(@Valid @RequestBody LoginRequestDto requestDto){
         return userService.login(requestDto);
     }
 

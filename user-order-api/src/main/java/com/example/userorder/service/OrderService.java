@@ -27,7 +27,7 @@ public class OrderService{
     public OrderResponseDto createOrder(OrderRequestDto requestDto){
         User user = userRepository.findById(requestDto.getUserId())
                 .orElseThrow(OrderNotFoundException::new);
-        Order order = new Order(requestDto.getName(), user);
+        Order order = new Order(requestDto.getItem(), user);
 
         return new OrderResponseDto(orderRepository.save(order));
     }
@@ -50,7 +50,7 @@ public class OrderService{
         Order order = orderRepository.findById(id)
                 .orElseThrow(OrderNotFoundException::new);
 
-        order.setItem(requestDto.getName());
+        order.setItem(requestDto.getItem());
 
         return new OrderResponseDto(order);
     }

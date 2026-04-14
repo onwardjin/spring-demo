@@ -1,12 +1,14 @@
 package com.example.userorder.service;
 
 import com.example.userorder.dto.LoginRequestDto;
+import com.example.userorder.dto.LoginResponseDto;
 import com.example.userorder.dto.UserRequestDto;
 import com.example.userorder.dto.UserResponseDto;
 import com.example.userorder.entity.User;
 import com.example.userorder.exception.DuplicateLoginIdException;
 import com.example.userorder.exception.InvalidLoginException;
 import com.example.userorder.exception.UserNotFoundException;
+import com.example.userorder.jwt.JwtProvider;
 import com.example.userorder.repository.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,11 +22,12 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtProvider){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-
+        this.jwtProvider = jwtProvider;
     }
 
     @Transactional
@@ -32,14 +35,12 @@ public class UserService {
         if(userRepository.findByLoginId(requestDto.getLoginId()).isPresent()){
             throw new DuplicateLoginIdException();
         }
-
         User user = new User(
                 requestDto.getName(),
                 requestDto.getAge(),
                 requestDto.getLoginId(),
                 passwordEncoder.encode(requestDto.getPassword())
                 );
-
         try{
             return new UserResponseDto(userRepository.save(user));
         } catch(DataIntegrityViolationException e){
@@ -47,7 +48,7 @@ public class UserService {
         }
     }
 
-    public UserResponseDto login(LoginRequestDto requestDto){
+    public LoginResponseDto login(LoginRequestDto requestDto){
         User user = userRepository.findByLoginId(requestDto.getLoginId())
                 .orElseThrow(InvalidLoginException::new);
 
@@ -55,7 +56,8 @@ public class UserService {
             throw new InvalidLoginException();
         }
 
-        return new UserResponseDto(user);
+        String token = jwtProvider.createToken(user.getLoginId());
+        return new LoginResponseDto(token);
     }
 
     public List<UserResponseDto> readAllUsers() {
