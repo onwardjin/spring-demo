@@ -6,11 +6,11 @@ import jakarta.persistence.*;
 @Table(name = "orders")
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private String item;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -20,9 +20,8 @@ public class Order {
         this.user = user;
     }
 
-    public Long getId(){ return id; }
     public String getItem(){ return item; }
     public User getUser(){ return user; }
-    public void setItem(String item){ this.item = item; }
 
+    public void setItem(String item){ this.item = item; }
 }

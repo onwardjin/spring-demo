@@ -1,17 +1,14 @@
 package com.example.userorder.dto;
 
-import java.util.List;
-
 public class ErrorResponseDto {
-    private int status;
-    private List<String> errors;
+    private Integer status;
+    private String message;
 
-    public ErrorResponseDto(int status, List<String> errors){
+    public ErrorResponseDto(Integer status, String message){
         this.status = status;
-        this.errors = errors;
+        this.message = message;
     }
 
-    public List<String> getErrors(){
-        return errors;
-    }
+    public Integer getStatus(){ return status; }
+    public String getMessage(){ return message; }
 }

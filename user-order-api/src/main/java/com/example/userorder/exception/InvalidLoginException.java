@@ -1,0 +1,7 @@
+package com.example.userorder.exception;
+
+public class InvalidLoginException extends RuntimeException {
+    public InvalidLoginException() {
+        super("Login Fail");
+    }
+}

@@ -1,5 +1,6 @@
 package com.example.userorder.controller;
 
+import com.example.userorder.dto.LoginRequestDto;
 import com.example.userorder.dto.UserRequestDto;
 import com.example.userorder.dto.UserResponseDto;
 import com.example.userorder.service.UserService;
@@ -11,32 +12,35 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController{
-    private final UserService userService;
+    private UserService userService;
 
     public UserController(UserService userService){
         this.userService = userService;
     }
 
     @PostMapping
-    public UserResponseDto createUser(@Valid @RequestBody UserRequestDto request){
-        return userService.createUser(request);
+    public UserResponseDto createUser(@Valid @RequestBody UserRequestDto requestDto){
+        return userService.createUser(requestDto);
+    }
+
+    @PostMapping("/login")
+    public UserResponseDto login(@Valid @RequestBody LoginRequestDto requestDto){
+        return userService.login(requestDto);
     }
 
     @GetMapping
     public List<UserResponseDto> readAllUsers(){
-        return userService.getAllUsers();
+        return userService.readAllUsers();
     }
 
     @GetMapping("/{id}")
     public UserResponseDto readUser(@PathVariable Long id){
-        return userService.getUserById(id);
+        return userService.readUser(id);
     }
 
     @PutMapping("/{id}")
-    public UserResponseDto updateUser(@PathVariable Long id,
-                                      @Valid @RequestBody UserRequestDto request
-    ) {
-        return userService.updateUser(id, request);
+    public UserResponseDto updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDto requestDto){
+        return userService.updateUser(id, requestDto);
     }
 
     @DeleteMapping("/{id}")

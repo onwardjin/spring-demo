@@ -18,30 +18,27 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderResponseDto createOrder(@Valid @RequestBody OrderRequestDto request){
-        return orderService.createOrder(request);
+    public OrderResponseDto createOrder(@RequestBody OrderRequestDto requestDto){
+        return orderService.createOrder(requestDto);
     }
 
     @GetMapping
-    public List<OrderResponseDto> getOrders(){
-        return orderService.getAllOrders();
+    public List<OrderResponseDto> readAllOrders(){
+        return orderService.readAllOrders();
     }
 
     @GetMapping("/{id}")
-    public OrderResponseDto getOrder(@PathVariable Long id){
-        return orderService.getOrderById(id);
+    public OrderResponseDto readOrder(@Valid @PathVariable Long id){
+        return orderService.readOrder(id);
     }
 
     @PutMapping("/{id}")
-    public OrderResponseDto update(
-            @PathVariable Long id,
-            @Valid @RequestBody OrderRequestDto request
-    ) {
-        return orderService.updateOrder(id, request);
+    public OrderResponseDto updateOrder(@PathVariable Long id, @Valid @RequestBody OrderRequestDto requestDto){
+        return orderService.updateOrder(id, requestDto);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
+    public void deleteOrder(@PathVariable Long id){
         orderService.deleteOrder(id);
     }
 }
