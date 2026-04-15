@@ -36,21 +36,18 @@ public class UserService {
         if(userRepository.findByLoginId(requestDto.getLoginId()).isPresent()){
             throw new DuplicateLoginIdException();
         }
-
         User user = new User(
                 requestDto.getName(),
                 requestDto.getAge(),
                 requestDto.getLoginId(),
                 passwordEncoder.encode(requestDto.getPassword())
         );
-
         try{
             return new UserResponseDto(userRepository.save(user));
         } catch(DataIntegrityViolationException e){
             throw new DuplicateLoginIdException();
         }
     }
-
 
     public LoginResponseDto login(LoginRequestDto requestDto){
         User user = userRepository.findByLoginId(requestDto.getLoginId())
@@ -59,7 +56,7 @@ public class UserService {
             throw new InvalidLoginException();
         }
 
-        String token = jwtProvider.createToken(requestDto.getLoginId());
+        String token = jwtProvider.createToken(user.getLoginId());
         return new LoginResponseDto(token);
     }
 

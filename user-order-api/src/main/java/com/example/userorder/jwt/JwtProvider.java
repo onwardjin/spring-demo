@@ -1,22 +1,22 @@
 package com.example.userorder.jwt;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
-import jakarta.validation.ValidationException;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-public class JwtProvider{
-    private final static String SECRET_KET = "wieojpfijapodaoscdancjasnlkfjklsdjlfjaksdhfjwieqwerqiouepiqrdfjkakjf;";
-    private final static Long EXPIRATION = 1000L * 60 * 60;
+public class JwtProvider {
+    private static final String SECRET_KEY = "my-very-secret-jwt-key-that-is-long-enough-123456";
+    private static final Long EXPIRATION = 1000L * 60 * 60;
 
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KET.getBytes(StandardCharsets.UTF_8));
+    private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-    public String createToken(String loginId){
+    public String createToken(String loginId) {
         Date now = new Date();
-        Date expiry = new Date( now.getTime() + EXPIRATION );
+        Date expiry = new Date(now.getTime() + EXPIRATION);
 
         return Jwts.builder()
                 .subject(loginId)
@@ -26,19 +26,19 @@ public class JwtProvider{
                 .compact();
     }
 
-    public boolean validateToken(String token){
-        try{
+    public boolean validateToken(String token) {
+        try {
             Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
             return true;
-        } catch (ValidationException e){
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
-    public String getLoginId(String token){
+    public String getLoginId(String token) {
         return Jwts.parser()
                 .verifyWith(key)
                 .build()
