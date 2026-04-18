@@ -1,6 +1,6 @@
 package com.example.userorder.dto;
 
-public class ErrorResponseDto {
+public class ErrorResponseDto{
     private Integer status;
     private String message;
 

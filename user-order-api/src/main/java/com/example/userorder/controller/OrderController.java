@@ -2,8 +2,10 @@ package com.example.userorder.controller;
 
 import com.example.userorder.dto.OrderRequestDto;
 import com.example.userorder.dto.OrderResponseDto;
+import com.example.userorder.entity.User;
 import com.example.userorder.service.OrderService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,27 +20,30 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderResponseDto createOrder(@RequestBody OrderRequestDto requestDto){
-        return orderService.createOrder(requestDto);
+    public OrderResponseDto create(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody OrderRequestDto request
+            ){
+        return orderService.createOrder(user.getId(), request);
     }
 
-    @GetMapping
-    public List<OrderResponseDto> readAllOrders(){
-        return orderService.readAllOrders();
+    @GetMapping("/me")
+    public List<OrderResponseDto> getOrders(@AuthenticationPrincipal User user){
+        return orderService.getOrdersByUserId(user.getId());
     }
 
     @GetMapping("/{id}")
-    public OrderResponseDto readOrder(@Valid @PathVariable Long id){
-        return orderService.readOrder(id);
+    public OrderResponseDto getOrder(@AuthenticationPrincipal User user, @PathVariable Long id){
+        return orderService.getOrder(user.getId(), id);
     }
 
     @PutMapping("/{id}")
-    public OrderResponseDto updateOrder(@PathVariable Long id, @Valid @RequestBody OrderRequestDto requestDto){
-        return orderService.updateOrder(id, requestDto);
+    public OrderResponseDto update(@AuthenticationPrincipal User user, @PathVariable Long id, @Valid @RequestBody OrderRequestDto request){
+        return orderService.updateOrder(user.getId(), id, request);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteOrder(@PathVariable Long id){
-        orderService.deleteOrder(id);
+    public void delete(@AuthenticationPrincipal User user, @PathVariable Long id){
+        orderService.deleteOrder(user.getId(), id);
     }
 }

@@ -4,48 +4,38 @@ import com.example.userorder.dto.LoginRequestDto;
 import com.example.userorder.dto.LoginResponseDto;
 import com.example.userorder.dto.UserRequestDto;
 import com.example.userorder.dto.UserResponseDto;
+import com.example.userorder.entity.User;
 import com.example.userorder.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-public class UserController{
-    private UserService userService;
+public class UserController {
+    private final UserService userService;
 
     public UserController(UserService userService){
         this.userService = userService;
     }
 
     @PostMapping
-    public UserResponseDto createUser(@Valid @RequestBody UserRequestDto requestDto){
-        return userService.createUser(requestDto);
+    public UserResponseDto create(@Valid @RequestBody UserRequestDto request){
+        return userService.createUser(request);
     }
 
     @PostMapping("/login")
-    public LoginResponseDto login(@Valid @RequestBody LoginRequestDto requestDto){
-        return userService.login(requestDto);
+    public LoginResponseDto login(@Valid @RequestBody LoginRequestDto request){
+        return userService.login(request);
     }
 
-    @GetMapping
-    public List<UserResponseDto> readAllUsers(){
-        return userService.readAllUsers();
+    @PutMapping("/me")
+    public UserResponseDto update(@AuthenticationPrincipal User user, @Valid @RequestBody UserRequestDto request){
+        return userService.updateUser(user.getId(), request);
     }
 
-    @GetMapping("/{id}")
-    public UserResponseDto readUser(@PathVariable Long id){
-        return userService.readUser(id);
-    }
-
-    @PutMapping("/{id}")
-    public UserResponseDto updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDto requestDto){
-        return userService.updateUser(id, requestDto);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id){
-        userService.deleteUser(id);
+    @DeleteMapping("/me")
+    public void delete(@AuthenticationPrincipal User user){
+        userService.deleteUser(user.getId());
     }
 }

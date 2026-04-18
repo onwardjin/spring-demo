@@ -1,37 +1,41 @@
 package com.example.userorder.config;
 
-import com.example.userorder.jwt.JwtAuthenticationFilter;
+import com.example.userorder.filter.JwtAuthenticationFilter;
 import com.example.userorder.jwt.JwtProvider;
 import com.example.userorder.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-public class SecurityConfig {
-
+public class SecurityConfig{
     @Bean
-    public SecurityFilterChain securityFilterChain(
+    public SecurityFilterChain filterChain(
             HttpSecurity http,
             JwtProvider jwtProvider,
             UserRepository userRepository
     ) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
+                .csrf(csrf -> csrf.disable()) // 테스트용
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT니까 세션 안씀
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/**", "/orders/**", "/error").permitAll()
-                        .anyRequest().authenticated()
-                );
-
-        http.addFilterBefore(
-                new JwtAuthenticationFilter(jwtProvider, userRepository),
-                UsernamePasswordAuthenticationFilter.class
-                );
+                        .requestMatchers("/users", "/users/login").permitAll() // 로그인/회원가입 허용
+                        .anyRequest().authenticated() // 나머지는 인증 필요
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, userRepository),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 }

@@ -2,9 +2,11 @@ package com.example.userorder.service;
 
 import com.example.userorder.dto.OrderRequestDto;
 import com.example.userorder.dto.OrderResponseDto;
+import com.example.userorder.dto.UserResponseDto;
 import com.example.userorder.entity.Order;
 import com.example.userorder.entity.User;
-import com.example.userorder.exception.OrderNotFoundException;
+import com.example.userorder.exception.OrderNotFoundExeption;
+import com.example.userorder.exception.UserNotFoundException;
 import com.example.userorder.repository.OrderRepository;
 import com.example.userorder.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,7 @@ import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
-public class OrderService{
+public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
@@ -24,40 +26,44 @@ public class OrderService{
     }
 
     @Transactional
-    public OrderResponseDto createOrder(OrderRequestDto requestDto){
-        User user = userRepository.findById(requestDto.getUserId())
-                .orElseThrow(OrderNotFoundException::new);
-        Order order = new Order(requestDto.getItem(), user);
+    public OrderResponseDto createOrder(Long userId, OrderRequestDto request){
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+        Order order = new Order(request.getItem(), user);
+        orderRepository.save(order);
 
-        return new OrderResponseDto(orderRepository.save(order));
+        return new OrderResponseDto(order);
     }
 
-    public List<OrderResponseDto> readAllOrders(){
-        return orderRepository.findAllWithUser().stream()
+    public List<OrderResponseDto> getOrdersByUserId(Long userId){
+        // 유저 유효확인 생략, 추후 추가 예정
+        List<OrderResponseDto> orders = orderRepository.findAllWithUserId(userId)
+                .stream()
                 .map(OrderResponseDto::new)
                 .toList();
+
+        return orders;
     }
 
-    public OrderResponseDto readOrder(Long id){
-        Order order = orderRepository.findById(id)
-                .orElseThrow(OrderNotFoundException::new);
+    public OrderResponseDto getOrder(Long userId, Long orderId){
+        Order order = orderRepository.findByUserIdAndOrderId(userId, orderId)
+                .orElseThrow(OrderNotFoundExeption::new);
+        return new OrderResponseDto(order);
+    }
+
+    @Transactional
+    public OrderResponseDto updateOrder(Long userId, Long orderId, OrderRequestDto request){
+        Order order = orderRepository.findByUserIdAndOrderId(userId, orderId)
+                        .orElseThrow(OrderNotFoundExeption::new);
+        order.setItem(request.getItem());
 
         return new OrderResponseDto(order);
     }
 
     @Transactional
-    public OrderResponseDto updateOrder(Long id, OrderRequestDto requestDto){
-        Order order = orderRepository.findById(id)
-                .orElseThrow(OrderNotFoundException::new);
-
-        order.setItem(requestDto.getItem());
-
-        return new OrderResponseDto(order);
-    }
-
-    public void deleteOrder(Long id){
-        Order order = orderRepository.findById(id)
-                .orElseThrow(OrderNotFoundException::new);
+    public void deleteOrder(Long userId, Long orderId){
+        Order order = orderRepository.findByUserIdAndOrderId(userId, orderId)
+                        .orElseThrow(OrderNotFoundExeption::new);
         orderRepository.delete(order);
     }
 }

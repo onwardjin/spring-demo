@@ -1,21 +1,108 @@
-
+@baseUrl = http://localhost:8080
+@json = application/json
 
 ### 회원가입
-POST http://localhost:8080/users
-Content-Type: application/json
+POST {{baseUrl}}/users
+Content-Type: {{json}}
 
 {
-  "name": "Jin",
+  "name": "jin",
   "age": 28,
-  "loginId": "jin123",
+  "loginId": "jin01",
+  "password": "1234"
+}
+
+### 중복 회원가입 확인
+POST {{baseUrl}}/users
+Content-Type: {{json}}
+
+{
+  "name": "jin",
+  "age": 28,
+  "loginId": "jin01",
   "password": "1234"
 }
 
 ### 로그인
-POST http://localhost:8080/users/login
-Content-Type: application/json
+# 응답 token 값을 복사해서 아래 @token에 넣기
+POST {{baseUrl}}/users/login
+Content-Type: {{json}}
 
 {
-  "loginId": "jin123",
+  "loginId": "jin01",
   "password": "1234"
 }
+
+### 토큰 입력
+@token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqaW4wMSIsImlhdCI6MTc3NjUxNDcxNSwiZXhwIjoxNzc2NTE4MzE1fQ.r83lkxbtZubWJt7Ya8EGTs_HYfjjBbYBQqeoxlu-DRty0kH_rw9i3wrrKO2wcQ29j3c6XuXdiR39nE979I9crw
+
+### 내 정보 수정
+PUT {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "name": "jin-updated",
+  "age": 29,
+  "loginId": "jin01",
+  "password": "1234"
+}
+
+### 주문 생성 1
+POST {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "item": "keyboard"
+}
+
+### 주문 생성 2
+POST {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "item": "mouse"
+}
+
+### 내 주문 전체 조회
+GET {{baseUrl}}/orders/me
+Authorization: Bearer {{token}}
+
+### 주문 단건 조회 (id는 생성된 주문 id로 바꿔서 테스트)
+GET {{baseUrl}}/orders/1
+Authorization: Bearer {{token}}
+
+### 주문 수정 (id는 생성된 주문 id로 바꿔서 테스트)
+PUT {{baseUrl}}/orders/1
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "item": "mechanical keyboard"
+}
+
+### 주문 삭제 (id는 생성된 주문 id로 바꿔서 테스트)
+DELETE {{baseUrl}}/orders/1
+Authorization: Bearer {{token}}
+
+### 삭제 후 주문 전체 조회
+GET {{baseUrl}}/orders/me
+Authorization: Bearer {{token}}
+
+### 잘못된 비밀번호 로그인
+POST {{baseUrl}}/users/login
+Content-Type: {{json}}
+
+{
+  "loginId": "jin01",
+  "password": "wrong-password"
+}
+
+### 토큰 없이 주문 조회 -> 인증 실패 확인
+GET {{baseUrl}}/orders/me
+
+### 내 계정 삭제
+DELETE {{baseUrl}}/users/me
+Authorization: Bearer {{token}}

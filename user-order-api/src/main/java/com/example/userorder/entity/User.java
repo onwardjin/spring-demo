@@ -2,26 +2,24 @@ package com.example.userorder.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
-public class User {
+public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private Integer age;
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
 
-    @Column(unique = true)
     private String loginId;
     private String password;
 
     public User(){ }
-    public User(
-            String name,
-            Integer age,
-            String loginId,
-            String password
-            ){
+    public User(String name, Integer age, String loginId, String password){
         this.name = name;
         this.age = age;
         this.loginId = loginId;
