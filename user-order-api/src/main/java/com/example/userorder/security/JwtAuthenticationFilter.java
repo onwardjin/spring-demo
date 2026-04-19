@@ -1,7 +1,6 @@
-package com.example.userorder.filter;
+package com.example.userorder.security;
 
 import com.example.userorder.entity.User;
-import com.example.userorder.jwt.JwtProvider;
 import com.example.userorder.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,9 +36,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                 String loginId = jwtProvider.getLoginId(token);
                 User user = userRepository.findByLoginId(loginId).orElse(null);
 
-                if (token != null) {
+                if (user != null) {
+                    CustomUserPrincipal principal = new CustomUserPrincipal(user);
                     Authentication authentication =
-                            new UsernamePasswordAuthenticationToken(user, null, null);
+                            new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }

@@ -2,10 +2,9 @@ package com.example.userorder.service;
 
 import com.example.userorder.dto.OrderRequestDto;
 import com.example.userorder.dto.OrderResponseDto;
-import com.example.userorder.dto.UserResponseDto;
 import com.example.userorder.entity.Order;
 import com.example.userorder.entity.User;
-import com.example.userorder.exception.OrderNotFoundExeption;
+import com.example.userorder.exception.OrderNotFoundException;
 import com.example.userorder.exception.UserNotFoundException;
 import com.example.userorder.repository.OrderRepository;
 import com.example.userorder.repository.UserRepository;
@@ -45,25 +44,27 @@ public class OrderService {
         return orders;
     }
 
-    public OrderResponseDto getOrder(Long userId, Long orderId){
-        Order order = orderRepository.findByUserIdAndOrderId(userId, orderId)
-                .orElseThrow(OrderNotFoundExeption::new);
+    public OrderResponseDto getOrder(Long orderId, Long userId){
+        Order order = getMyOrder(orderId, userId);
         return new OrderResponseDto(order);
     }
 
     @Transactional
-    public OrderResponseDto updateOrder(Long userId, Long orderId, OrderRequestDto request){
-        Order order = orderRepository.findByUserIdAndOrderId(userId, orderId)
-                        .orElseThrow(OrderNotFoundExeption::new);
+    public OrderResponseDto updateOrder(Long orderId, Long userId, OrderRequestDto request){
+        Order order = getMyOrder(orderId, userId);
         order.setItem(request.getItem());
 
         return new OrderResponseDto(order);
     }
 
     @Transactional
-    public void deleteOrder(Long userId, Long orderId){
-        Order order = orderRepository.findByUserIdAndOrderId(userId, orderId)
-                        .orElseThrow(OrderNotFoundExeption::new);
+    public void deleteOrder(Long orderId, Long userId){
+        Order order = getMyOrder(orderId, userId);
         orderRepository.delete(order);
+    }
+
+    private Order getMyOrder(Long orderId, Long userId){
+        return orderRepository.findByIdAndUserId(orderId, userId)
+                .orElseThrow(OrderNotFoundException::new);
     }
 }

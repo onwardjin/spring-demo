@@ -1,18 +1,19 @@
 package com.example.userorder.service;
 
-import com.example.userorder.dto.LoginRequestDto;
-import com.example.userorder.dto.LoginResponseDto;
-import com.example.userorder.dto.UserRequestDto;
-import com.example.userorder.dto.UserResponseDto;
+import com.example.userorder.dto.*;
+import com.example.userorder.entity.Role;
 import com.example.userorder.entity.User;
 import com.example.userorder.exception.DuplicateLoginIdException;
 import com.example.userorder.exception.InvalidLoginException;
 import com.example.userorder.exception.UserNotFoundException;
-import com.example.userorder.jwt.JwtProvider;
 import com.example.userorder.repository.UserRepository;
+import com.example.userorder.security.JwtProvider;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -37,7 +38,8 @@ public class UserService {
                 request.getName(),
                 request.getAge(),
                 request.getLoginId(),
-                passwordEncoder.encode(request.getPassword())
+                passwordEncoder.encode(request.getPassword()),
+                Role.USER
         );
 
         return new UserResponseDto(userRepository.save(user));
@@ -50,8 +52,14 @@ public class UserService {
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new InvalidLoginException();
         }
-
         return new LoginResponseDto(jwtProvider.createToken(user.getLoginId()));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserResponseDto> getAllUsers(){
+        return userRepository.findAll().stream()
+                .map(UserResponseDto::new)
+                .toList();
     }
 
     @Transactional
@@ -61,6 +69,16 @@ public class UserService {
         user.setName(request.getName());
         user.setAge(request.getAge());
 
+        return new UserResponseDto(user);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponseDto updateRole(Long userId, RoleUpdateRequestDto request){
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        user.setRole(request.getRole());
         return new UserResponseDto(user);
     }
 

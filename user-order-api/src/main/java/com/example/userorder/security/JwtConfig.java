@@ -1,6 +1,5 @@
-package com.example.userorder.config;
+package com.example.userorder.security;
 
-import com.example.userorder.jwt.JwtProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

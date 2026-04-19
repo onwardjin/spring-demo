@@ -32,8 +32,8 @@ public class GlobalExceptionHandler{
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(OrderNotFoundExeption.class)
-    ResponseEntity<ErrorResponseDto> handleOrderNotFound(OrderNotFoundExeption e){
+    @ExceptionHandler(OrderNotFoundException.class)
+    ResponseEntity<ErrorResponseDto> handleOrderNotFound(OrderNotFoundException e){
         ErrorResponseDto response = new ErrorResponseDto(404, e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }

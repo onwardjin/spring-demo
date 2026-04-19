@@ -1,4 +1,4 @@
-package com.example.userorder.jwt;
+package com.example.userorder.security;
 
 import com.example.userorder.exception.InvalidTokenException;
 import io.jsonwebtoken.JwtException;

@@ -12,7 +12,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("select o from Order o join fetch o.user where o.user.id = :userId")
     List<Order> findAllWithUserId(@Param("userId") Long userId);
 
-    @Query("select o from Order o join fetch o.user where o.user.id = :userId and o.id = :orderId ")
-    Optional<Order> findByUserIdAndOrderId(@Param("userId")Long userId, @Param("orderId")Long orderId);
+    @Query("select o from Order o where o.id = :orderId AND o.user.id = :userId")
+    Optional<Order> findByIdAndUserId(
+            @Param("orderId") Long orderId,
+            @Param("userId") Long userId
+    );
 }
 
