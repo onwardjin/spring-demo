@@ -4,6 +4,7 @@ import com.example.userorder.dto.*;
 import com.example.userorder.security.CustomUserPrincipal;
 import com.example.userorder.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,30 +18,31 @@ public class UserController {
     }
 
     @PostMapping
-    public UserResponseDto create(@Valid @RequestBody UserCreateRequestDto request){
+    public UserResponseDto createUser(@Valid @RequestBody UserCreateRequestDto request) {
         return userService.createUser(request);
     }
 
     @PostMapping("/login")
-    public LoginResponseDto login(@Valid @RequestBody LoginRequestDto request){
+    public LoginResponseDto login(@Valid @RequestBody LoginRequestDto request) {
         return userService.login(request);
     }
 
     @GetMapping("/me")
-    public UserResponseDto getInfo(@AuthenticationPrincipal CustomUserPrincipal user){
-        return userService.getInfoByLoginId(user.getId());
+    public UserResponseDto getUserInfo(@AuthenticationPrincipal CustomUserPrincipal principal) {
+        return userService.getUserInfo(principal.getUser());
     }
 
-    @PutMapping("/me")
-    public UserResponseDto update(
-            @AuthenticationPrincipal CustomUserPrincipal user,
+    @PatchMapping("/me")
+    public UserResponseDto updateUser(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
             @Valid @RequestBody UserUpdateRequestDto request
-            ){
-        return userService.updateUser(user.getId(), request);
+    ) {
+        return userService.updateUser(principal.getId(), request);
     }
 
     @DeleteMapping("/me")
-    public void delete(@AuthenticationPrincipal CustomUserPrincipal user){
-        userService.deleteUser(user.getId());
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserPrincipal principal) {
+        userService.deleteUser(principal.getId());
+        return ResponseEntity.noContent().build();
     }
 }

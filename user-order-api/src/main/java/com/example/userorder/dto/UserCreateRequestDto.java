@@ -4,32 +4,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public class UserCreateRequestDto{
-    @NotBlank(message = "Name is required")
-    private String name;
+public record UserCreateRequestDto(
+        @NotBlank(message = "login ID is required")
+        String loginId,
 
-    @NotNull(message = "Age is required")
-    @Min(0)
-    private Integer age;
+        @NotBlank(message = "Password is required")
+        String password,
 
-    @NotBlank(message = "Login ID is required")
-    private String loginId;
+        @NotBlank(message = "Name is required")
+        String name,
 
-    @NotBlank(message = "Password is required")
-    private String password;
-
-    public String getName() { return name; }
-    public Integer getAge() {
-        return age;
-    }
-    public String getLoginId() {
-        return loginId;
-    }
-    public String getPassword() {
-        return password;
-    }
-
-    public void setName(String name) { this.name = name; }
-    public void setAge(Integer age) { this.age = age; }
-    public void setLoginId(String loginId) { this.loginId = loginId; }
+        @Min(0) @NotNull(message = "Age is required")
+        Integer age
+) {
 }

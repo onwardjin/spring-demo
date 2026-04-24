@@ -1,13 +1,13 @@
 package com.example.userorder.service;
 
 import com.example.userorder.dto.*;
-import com.example.userorder.entity.Role;
 import com.example.userorder.entity.User;
-import com.example.userorder.exception.DuplicateLoginException;
+import com.example.userorder.exception.DuplicateLoginIdException;
 import com.example.userorder.exception.InvalidLoginException;
 import com.example.userorder.exception.UserNotFoundException;
 import com.example.userorder.repository.UserRepository;
 import com.example.userorder.security.JwtProvider;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,60 +29,58 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto createUser(UserCreateRequestDto request){
-        if(userRepository.findByLoginId(request.getLoginId()).isPresent()){
-            throw new DuplicateLoginException();
+    public UserResponseDto createUser(UserCreateRequestDto request) {
+        if (userRepository.findByLoginId(request.loginId()).isPresent()) {
+            throw new DuplicateLoginIdException();
         }
 
-        User user = new User(
-                request.getName(),
-                request.getAge(),
-                request.getLoginId(),
-                passwordEncoder.encode(request.getPassword()),
-                Role.USER
+        User user = User.createGeneralUser(
+                request.loginId(),
+                passwordEncoder.encode(request.password()),
+                request.name(),
+                request.age()
         );
 
-        User savedUser = userRepository.save(user);
-        return new UserResponseDto(savedUser);
+        try {
+            User savedUser = userRepository.save(user);
+            return new UserResponseDto(savedUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateLoginIdException();
+        }
     }
 
-    public LoginResponseDto login(LoginRequestDto request){
-        User user = userRepository.findByLoginId(request.getLoginId())
+    public LoginResponseDto login(LoginRequestDto request) {
+        User user = userRepository.findByLoginId(request.loginId())
                 .orElseThrow(InvalidLoginException::new);
-
-        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new InvalidLoginException();
         }
-        String token = jwtProvider.createToken(request.getLoginId());
+
+        String token = jwtProvider.createToken(user.getLoginId());
         return new LoginResponseDto(token);
     }
 
-    public UserResponseDto getInfoByLoginId(Long userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
-
-        return new UserResponseDto(user);
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
-    public List<UserResponseDto> getAllUsers(){
+    public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserResponseDto::new)
                 .toList();
     }
 
-    @Transactional
-    public UserResponseDto updateUser(Long userId, UserUpdateRequestDto requestDto){
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
-        user.setName(requestDto.getName());
-        user.setAge(requestDto.getAge());
-
+    public UserResponseDto getUserInfo(User user) {
         return new UserResponseDto(user);
     }
 
     @Transactional
-    public void deleteUser(Long userId){
+    public UserResponseDto updateUser(Long userId, UserUpdateRequestDto request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+        user.updateInfo(request.name(), request.age());
+        return new UserResponseDto(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
         userRepository.delete(user);

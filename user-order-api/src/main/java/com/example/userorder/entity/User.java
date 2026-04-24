@@ -1,57 +1,52 @@
 package com.example.userorder.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User{
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
+    private String loginId;
+    private String password;
+
     private String name;
     private Integer age;
     @Enumerated(EnumType.STRING)
     private Role role;
-
     @OneToMany(mappedBy = "user")
-    private List<Order> orders;
+    private List<Order> orders = new ArrayList<>();
 
-    private String loginId;
-    private String password;
 
-    public User(){ }
-    public User(String name, Integer age, String loginId, String password, Role role){
-        this.name = name;
-        this.age = age;
+    private User(String loginId, String password, String name, Integer age, Role role) {
         this.loginId = loginId;
         this.password = password;
+        this.name = name;
+        this.age = age;
         this.role = role;
     }
 
-    public Long getId() {
-        return id;
-    }
-    public String getName() {
-        return name;
-    }
-    public Integer getAge() { return age;}
-    public Role getRole() {
-        return role;
-    }
-    public String getLoginId() {
-        return loginId;
-    }
-    public String getPassword() {
-        return password;
+    public static User createGeneralUser(String loginId, String password, String name, Integer age) {
+        return new User(loginId, password, name, age, Role.USER);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public static User createAdminUser(String loginId, String password, String name, Integer age) {
+        return new User(loginId, password, name, age, Role.ADMIN);
     }
-    public void setAge(Integer age) {
+
+    public void updateInfo(String name, Integer age) {
+        this.name = name;
         this.age = age;
     }
-    public void setRole(Role role){ this.role = role; }
 }

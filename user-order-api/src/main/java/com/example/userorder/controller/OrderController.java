@@ -1,12 +1,12 @@
 package com.example.userorder.controller;
 
-import com.example.userorder.dto.OrderRequestDto;
+import com.example.userorder.dto.OrderCreateRequestDto;
 import com.example.userorder.dto.OrderResponseDto;
-import com.example.userorder.entity.User;
+import com.example.userorder.dto.OrderUpdateRequestDto;
 import com.example.userorder.security.CustomUserPrincipal;
 import com.example.userorder.service.OrderService;
-import com.example.userorder.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,35 +22,43 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderResponseDto create(
-            @Valid @RequestBody OrderRequestDto request,
-            @AuthenticationPrincipal CustomUserPrincipal user
-    ){
-        return orderService.createOrder(request, user.getId());
+    public OrderResponseDto createOrder(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @Valid @RequestBody OrderCreateRequestDto request
+    ) {
+        return orderService.createOrder(principal.getId(), request);
     }
 
     @GetMapping
-    public List<OrderResponseDto> getOrders(@AuthenticationPrincipal CustomUserPrincipal user){
-        return orderService.getOrdersByUserId(user.getId());
+    public List<OrderResponseDto> getAllOrders(
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        return orderService.getAllOrdersByUserId(principal.getId());
     }
 
     @GetMapping("/{id}")
-    public OrderResponseDto getOrder(@PathVariable Long id, @AuthenticationPrincipal CustomUserPrincipal user){
-        return orderService.getOrderById(id, user.getId());
+    public OrderResponseDto getOrder(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @PathVariable Long orderId
+    ) {
+        return orderService.getOrderById(principal.getId(), orderId);
     }
 
-    @PutMapping("/{id}")
-    public OrderResponseDto update(
-            @PathVariable Long id,
-            @RequestBody OrderRequestDto request,
-            @AuthenticationPrincipal CustomUserPrincipal user){
-        return orderService.updateOrder(id, request, user.getId());
+    @PatchMapping("/{id}")
+    public OrderResponseDto updateOrder(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @PathVariable Long orderId,
+            @Valid @RequestBody OrderUpdateRequestDto request
+    ) {
+        return orderService.updateOrder(principal.getId(), orderId, request);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id,
-                       @AuthenticationPrincipal CustomUserPrincipal user
-    ){
-        orderService.deleteOrder(id, user.getId());
+    public ResponseEntity<Void> deleteOrder(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @PathVariable Long orderId
+    ) {
+        orderService.deleteOrder(principal.getId(), orderId);
+        return ResponseEntity.noContent().build();
     }
 }

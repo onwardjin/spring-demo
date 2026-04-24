@@ -1,19 +1,14 @@
 package com.example.userorder.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public class UserUpdateRequestDto {
-    @NotBlank(message = "Name is required")
-    private String name;
+public record UserUpdateRequestDto(
+        @NotBlank(message = "Name is required")
+        String name,
 
-    @NotBlank(message = "Age is required")
-    private Integer age;
-
-    public String getName() {
-        return name;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
+        @Min(0) @NotNull(message = "Age is required")
+        Integer age
+) {
 }

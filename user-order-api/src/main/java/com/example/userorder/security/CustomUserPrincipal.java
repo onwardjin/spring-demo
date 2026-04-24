@@ -11,23 +11,32 @@ import java.util.List;
 public class CustomUserPrincipal implements UserDetails {
     private final User user;
 
-    public CustomUserPrincipal(User user){
+    public CustomUserPrincipal(User user) {
         this.user = user;
     }
 
-    public Long getId(){ return user.getId(); }
-    public String getLoginId(){ return user.getLoginId(); }
+    public User getUser() {
+        return user;
+    }
+
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getLoginId() {
+        return user.getLoginId();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(
-                new SimpleGrantedAuthority("ROLE_"+user.getRole().name())
+                new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
         );
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return "";
     }
 
     @Override
