@@ -8,10 +8,10 @@ public record OrderCreateRequestDto(
         @NotBlank(message = "Product name is required")
         String productName,
 
-        @Min(0) @NotNull(message = "Price is required")
-        Integer price,
-
         @Min(0) @NotNull(message = "Quantity is required")
-        Integer quantity
+        Integer quantity,
+
+        @Min(0) @NotNull(message = "Price is required")
+        Integer price
 ) {
 }

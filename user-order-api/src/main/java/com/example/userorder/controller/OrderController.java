@@ -36,7 +36,7 @@ public class OrderController {
         return orderService.getAllOrdersByUserId(principal.getId());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{orderId}")
     public OrderResponseDto getOrder(
             @AuthenticationPrincipal CustomUserPrincipal principal,
             @PathVariable Long orderId
@@ -44,7 +44,7 @@ public class OrderController {
         return orderService.getOrderById(principal.getId(), orderId);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{orderId}")
     public OrderResponseDto updateOrder(
             @AuthenticationPrincipal CustomUserPrincipal principal,
             @PathVariable Long orderId,
@@ -53,7 +53,7 @@ public class OrderController {
         return orderService.updateOrder(principal.getId(), orderId, request);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> deleteOrder(
             @AuthenticationPrincipal CustomUserPrincipal principal,
             @PathVariable Long orderId

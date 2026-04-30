@@ -39,8 +39,7 @@ public class UserServiceTest {
     @Test
     void createUser_withValidRequest_returnsUserResponse() {
         UserCreateRequestDto request =
-                new UserCreateRequestDto("testId", "testPassword", "testName", 100);
-        User user = User.createGeneralUser("testId", "encodedPassword", "testName", 100);
+                new UserCreateRequestDto("testLoginId", "testPassword", "testUserName", 100);
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
         when(userRepository.findByLoginId(request.loginId()))
@@ -48,41 +47,46 @@ public class UserServiceTest {
         when(passwordEncoder.encode(request.password()))
                 .thenReturn("encodedPassword");
         when(userRepository.save(any(User.class)))
-                .thenReturn(user);
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         UserResponseDto result = userService.createUser(request);
 
         verify(userRepository).findByLoginId(request.loginId());
         verify(passwordEncoder).encode(request.password());
         verify(userRepository).save(captor.capture());
-        assertEquals("testId", captor.getValue().getLoginId());
-        assertEquals("testName", captor.getValue().getName());
-        assertEquals(100, captor.getValue().getAge());
+
+        User savedUser = captor.getValue();
+
+        assertEquals(request.loginId(), savedUser.getLoginId());
+        assertEquals("encodedPassword", savedUser.getPassword());
+        assertEquals(request.name(), savedUser.getName());
+        assertEquals(request.age(), savedUser.getAge());
+
+        assertEquals(request.loginId(), result.loginId());
+        assertEquals(request.name(), result.name());
+        assertEquals(request.age(), result.age());
     }
 
     @Test
     void createUser_withDuplicateLoginId_throwsDuplicateLoginException() {
         UserCreateRequestDto request =
-                new UserCreateRequestDto("testId", "testPassword", "testName", 100);
-        User user = User.createGeneralUser("testId", "encodedPassword", "testName", 100);
+                new UserCreateRequestDto("testLoginId", "testPassword", "testUserName", 100);
+        User user = User.createGeneralUser("testLoginId", "encodedPassword", "testUserName", 100);
 
         when(userRepository.findByLoginId(request.loginId()))
                 .thenReturn(Optional.of(user));
 
-        assertThrows(DuplicateLoginIdException.class,
-                () -> userService.createUser(request));
+        assertThrows(DuplicateLoginIdException.class, () -> userService.createUser(request));
 
-        verify(passwordEncoder, never()).encode(anyString());
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository).findByLoginId(request.loginId());
+        verify(passwordEncoder, never()).encode(any());
+        verify(userRepository, never()).save(any());
     }
 
     @Test
     void login_withValidRequest_returnsLoginResponse() {
-        LoginRequestDto request =
-                new LoginRequestDto("testId", "testPassword");
-        User user =
-                User.createGeneralUser("testId", "encodedPassword", "testName", 100);
-
+        LoginRequestDto request = new LoginRequestDto("testLoginId", "testPassword");
+        User user = User.createGeneralUser("testLoginId", "encodedPassword", "testUserName", 100);
 
         when(userRepository.findByLoginId(request.loginId()))
                 .thenReturn(Optional.of(user));
@@ -100,102 +104,89 @@ public class UserServiceTest {
     }
 
     @Test
-    void login_withNonExistingLoginId_throwsInvalidLoginException() {
-        LoginRequestDto request =
-                new LoginRequestDto("testId", "testPassword");
+    void login_withUserNotFound_throwsInvalidLoginException() {
+        LoginRequestDto request = new LoginRequestDto("testLoginId", "testPassword");
 
         when(userRepository.findByLoginId(request.loginId()))
                 .thenReturn(Optional.empty());
 
-        assertThrows(InvalidLoginException.class,
-                () -> userService.login(request));
+        assertThrows(InvalidLoginException.class, () -> userService.login(request));
 
         verify(userRepository).findByLoginId(request.loginId());
-        verify(passwordEncoder, never()).matches(anyString(), anyString());
-        verify(jwtProvider, never()).createToken(anyString());
+        verify(passwordEncoder, never()).matches(any(), any());
+        verify(jwtProvider, never()).createToken(any());
     }
 
     @Test
     void login_withWrongPassword_throwsInvalidLoginException() {
-        LoginRequestDto request =
-                new LoginRequestDto("testId", "testWrongPassword");
-        User user =
-                User.createGeneralUser("testId", "encodedPassword", "testName", 100);
-
+        LoginRequestDto request = new LoginRequestDto("testLoginId", "wrongPassword");
+        User user = User.createGeneralUser("testLoginId", "encodedPassword", "testUserName", 100);
 
         when(userRepository.findByLoginId(request.loginId()))
                 .thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(request.password(), user.getPassword()))
-                .thenReturn(false);
 
-        assertThrows(InvalidLoginException.class,
-                () -> userService.login(request));
-
+        assertThrows(InvalidLoginException.class, () -> userService.login(request));
         verify(userRepository).findByLoginId(request.loginId());
         verify(passwordEncoder).matches(request.password(), user.getPassword());
-        verify(jwtProvider, never()).createToken(anyString());
+        verify(jwtProvider, never()).createToken(any());
     }
 
     @Test
     void updateUser_withValidRequest_returnsUserResponse() {
-        Long principalUserId = 1L;
-        UserUpdateRequestDto request =
-                new UserUpdateRequestDto("testUpdateName", 10);
-        User user = User.createGeneralUser("testId", "encodedPassword", "testName", 100);
+        Long userId = 1L;
+        UserUpdateRequestDto request = new UserUpdateRequestDto("testUpdatedName", 20);
+        User user = User.createGeneralUser("testLoginId", "testPassword", "testName", 100);
 
-        when(userRepository.findById(principalUserId))
+        when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
-        UserResponseDto result = userService.updateUser(principalUserId, request);
+        UserResponseDto response = userService.updateUser(userId, request);
 
-        verify(userRepository).findById(principalUserId);
-        verify(userRepository, never()).save(any(User.class));
-        assertEquals(request.name(), result.name());
-        assertEquals(request.age(), result.age());
+        verify(userRepository).findById(userId);
+        verify(userRepository, never()).save(any());
+
+        assertEquals("testUpdatedName", response.name());
+        assertEquals(20, response.age());
+        assertEquals("testUpdatedName", user.getName());
+        assertEquals(20, user.getAge());
     }
 
     @Test
-    void updateUser_withNonExistingUser_throwsUserNotFoundException() {
-        Long principalUserId = 1L;
-        UserUpdateRequestDto request =
-                new UserUpdateRequestDto("testUpdateName", 10);
+    void updateUser_withUserNotFound_throwsUserNotFoundException() {
+        Long userId = 1L;
+        UserUpdateRequestDto request = new UserUpdateRequestDto("testUpdatedName", 20);
 
-        when(userRepository.findById(principalUserId))
+        when(userRepository.findById(userId))
                 .thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
-                () -> userService.updateUser(principalUserId, request));
-        verify(userRepository).findById(principalUserId);
+        assertThrows(UserNotFoundException.class, () -> userService.updateUser(userId, request));
+        verify(userRepository).findById(userId);
+        verify(userRepository, never()).save(any());
     }
 
     @Test
-    void deleteUser_withValidRequest_success() {
-        Long principalUserId = 1L;
-        User user =
-                User.createGeneralUser("testId", "encodedPassword", "testName", 100);
-        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+    void deleteUser_withValidRequest_deleteUser() {
+        Long userId = 1L;
+        User user = User.createGeneralUser("testLoginId", "testPassword", "testName", 100);
 
-        when(userRepository.findById(principalUserId))
+        when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
-        userService.deleteUser(principalUserId);
+        userService.deleteUser(userId);
 
-        verify(userRepository).findById(principalUserId);
-        verify(userRepository).delete(captor.capture());
-        assertEquals(user, captor.getValue());
+        verify(userRepository).findById(userId);
+        verify(userRepository).delete(user);
     }
 
     @Test
-    void deleteUser_withNonExistingUser_throwsUserNotFoundException() {
-        Long principalUserId = 1L;
+    void deleteUser_withUserNotFound_throwsUserNotFoundException() {
+        Long userId = 1L;
 
-        when(userRepository.findById(principalUserId))
+        when(userRepository.findById(userId))
                 .thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
-                () -> userService.deleteUser(principalUserId));
-
-        verify(userRepository).findById(principalUserId);
-        verify(userRepository, never()).delete(any(User.class));
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(userId));
+        verify(userRepository).findById(userId);
+        verify(userRepository, never()).delete(any());
     }
 }
