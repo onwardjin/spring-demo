@@ -10,6 +10,7 @@ import com.example.userorder.domain.user.User;
 import com.example.userorder.dto.order.OrderItemCreateRequest;
 import com.example.userorder.dto.order.OrderItemResponse;
 import com.example.userorder.dto.order.OrderResponse;
+import com.example.userorder.dto.order.OrderSearchCondition;
 import com.example.userorder.repository.OrderItemRepository;
 import com.example.userorder.repository.OrderRepository;
 import com.example.userorder.repository.ProductRepository;
@@ -46,8 +47,8 @@ public class OrderService {
         return orderRepository.save(order).getId();
     }
 
-    public Slice<OrderResponse> searchOrders(Long userId, Pageable pageable) {
-        return orderRepository.findByUser_Id(userId, pageable)
+    public Slice<OrderResponse> searchOrders(Long userId, OrderSearchCondition condition, Pageable pageable) {
+        return orderRepository.searchOrders(userId, condition, pageable)
                 .map(OrderResponse::from);
     }
 
@@ -55,7 +56,7 @@ public class OrderService {
         if (!orderRepository.existsByUser_IdAndId(userId, orderId)) {
             throw new OrderNotFoundException();
         }
-        return orderItemRepository.findByOrder_Id(orderId)
+        return orderItemRepository.findWithProductByOrderId(orderId)
                 .stream()
                 .map(OrderItemResponse::from)
                 .toList();

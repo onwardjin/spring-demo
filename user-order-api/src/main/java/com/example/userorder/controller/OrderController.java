@@ -3,6 +3,7 @@ package com.example.userorder.controller;
 import com.example.userorder.dto.order.OrderItemCreateRequest;
 import com.example.userorder.dto.order.OrderItemResponse;
 import com.example.userorder.dto.order.OrderResponse;
+import com.example.userorder.dto.order.OrderSearchCondition;
 import com.example.userorder.repository.OrderRepository;
 import com.example.userorder.security.CustomUserPrincipal;
 import com.example.userorder.service.OrderService;
@@ -42,9 +43,9 @@ public class OrderController {
 
     @GetMapping
     public Slice<OrderResponse> searchOrders(
-            @AuthenticationPrincipal CustomUserPrincipal principal, Pageable pageable
+            @AuthenticationPrincipal CustomUserPrincipal principal, OrderSearchCondition condition, Pageable pageable
     ) {
-        return orderService.searchOrders(principal.getId(), pageable);
+        return orderService.searchOrders(principal.getId(), condition, pageable);
     }
 
     @GetMapping("/{orderId}")

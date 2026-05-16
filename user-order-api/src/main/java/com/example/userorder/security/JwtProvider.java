@@ -1,6 +1,8 @@
 package com.example.userorder.security;
 
+import com.example.userorder.domain.user.Role;
 import com.example.userorder.domain.user.vo.LoginId;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -15,7 +17,7 @@ public class JwtProvider {
 
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-    public String createToken(LoginId loginId) {
+    public String createToken(Long userId, LoginId loginId, Role role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + EXPIRATION);
 
@@ -23,7 +25,9 @@ public class JwtProvider {
                 .signWith(key)
                 .issuedAt(now)
                 .expiration(expiry)
-                .subject(loginId.value())
+                .subject(String.valueOf(userId))
+                .claim("loginId", loginId.value())
+                .claim("role", role.name())
                 .compact();
     }
 
@@ -39,13 +43,13 @@ public class JwtProvider {
         }
     }
 
-    public LoginId getLoginId(String token) {
-        String loginId = Jwts.parser()
+    public JwtUserInfo getUserInfo(String token) {
+        Claims claims = Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
-        return LoginId.of(loginId);
+                .getPayload();
+
+        return JwtUserInfo.from(claims);
     }
 }

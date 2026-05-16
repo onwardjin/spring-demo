@@ -68,7 +68,7 @@ public class UserService {
             throw new InvalidLoginException();
         }
 
-        String token = jwtProvider.createToken(user.getLoginId());
+        String token = jwtProvider.createToken(user.getId(), user.getLoginId(), user.getRole());
         return new LoginResponse(token);
     }
 
